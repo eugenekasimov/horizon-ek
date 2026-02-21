@@ -4432,6 +4432,17 @@ text-component {
   }
 }
 
+/* Best Sellers "Show more" reveal animation */
+@media (prefers-reduced-motion: no-preference) {
+  .best-seller-card {
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+  .best-seller-card--reveal-start {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;

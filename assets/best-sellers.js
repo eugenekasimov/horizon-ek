@@ -82,11 +82,20 @@ class BestSellersSection extends HTMLElement {
     const cards = this.productCardsContainer?.querySelectorAll(
       ".best-seller-card[data-show-more-hidden='true']",
     );
-    cards?.forEach((card) => {
+    if (!cards?.length) return;
+    cards.forEach((card) => {
       card.classList.remove("hidden");
+      card.classList.add("best-seller-card--reveal-start");
       card.removeAttribute("data-show-more-hidden");
     });
     this.showMoreBtn?.classList.add("hidden");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        cards.forEach((card) =>
+          card.classList.remove("best-seller-card--reveal-start"),
+        );
+      });
+    });
   }
 }
 
