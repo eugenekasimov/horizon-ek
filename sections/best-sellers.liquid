@@ -1,0 +1,123 @@
+<script src="{{ 'tailwind-browser.js' | asset_url }}" defer></script>
+<script
+  src="{{ 'best-sellers.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+  defer
+></script>
+<div
+  class="section section--page-width section--full-width-right"
+>
+  <best-sellers-section class="tw-flex tw-flex-col tw-w-full tw-ap-[12px] tw-my-10">
+    <div
+      class="tw-flex tw-w-[auto] sm:tw-pr-[128px] tw-justify-center sm:tw-justify-between tw-items-center tw-mb-[36px]"
+      >
+        <h1
+          class="tw-text-[40px] tw-leading-[120%] tw-tracking-[-1%] tw-font-[900] tw-h-[52px]"
+        >
+          Best Sellers
+        </h1>
+        <a href="{{ section.settings.collection.url | default: '#' }}" class="tw-hidden sm:tw-flex tw-gap-[8px]"
+          >Shop All Best Sellers
+          <svg
+            class="tw-w-6 tw-h-6"
+            viewBox="0 0 32 32"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M 21.1875 9.28125 L 19.78125 10.71875 L 24.0625 15 L 4 15 L 4 17 L 24.0625 17 L 19.78125 21.28125 L 21.1875 22.71875 L 27.90625 16 Z"
+            /></svg
+        ></a>
+      </div>
+      <div
+        id="product-cards-container"
+        class="best-sellers__scroll tw-grid tw-grid-cols-2 tw-px-[0px] sm:tw-px-0 sm:tw-flex tw-gap-[24px] sm:tw-overflow-auto"
+      >
+        {% if section.settings.collection != blank %}
+          {% for product in section.settings.collection.products -%}
+            {% liquid
+              assign image_default = product.featured_media.preview_image | image_url: width: 710
+              assign second_media = product.media[1] | default: product.featured_media
+              assign image_hover = second_media.preview_image | default: product.featured_media.preview_image | image_url: width: 710
+              assign has_discount = false
+              if product.compare_at_price > product.price
+                assign discount_pct = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round
+                if discount_pct > 0
+                  assign has_discount = true
+                endif
+              endif
+            %}
+            <div
+              class="best-seller-card tw-relative tw-col-span-1 tw-flex tw-flex-col tw-gap-[16px] tw-pb-[8px] sm:tw-pb-[16px] sm:tw-w-[355px] sm:tw-min-w-[355px]"
+              id="{{ product.id }}"
+              tabindex="0"
+              data-image-default="{{ image_default }}"
+              data-image-hover="{{ image_hover }}"
+            >
+              <a href="{{ product.url }}" class="tw-flex tw-flex-col tw-gap-[16px] tw-pb-[8px] sm:tw-pb-[16px] tw-flex-1">
+                <span
+                  class="tw-absolute tw-border tw-border-black tw-bg-white tw-top-3 tw-left-3 tw-size-fit tw-rounded-[100px] tw-text-[8px] sm:tw-text-[10px] tw-font-normal tw-py-[4px] tw-px-[8px]"
+                >
+                  Best seller
+                </span>
+                {% if has_discount %}
+                  <span
+                    class="tw-absolute tw-top-3 tw-right-3 tw-size-fit tw-text-white tw-bg-[#5C7962] tw-border tw-border-black tw-rounded-[100px] tw-text-[8px] sm:tw-text-[10px] tw-font-normal tw-py-[4px] tw-px-[8px]"
+                  >
+                    Save {{ discount_pct }}%
+                  </span>
+                {% endif %}
+                <img
+                  src="{{ product.featured_media.preview_image | image_url: width: 710 }}"
+                  alt="{{ product.featured_media.alt | default: product.title | escape }}"
+                  width="355"
+                  height="355"
+                  loading="lazy"
+                  class="best-seller-card__img tw-w-full tw-aspect-square tw-rounded-sm tw-object-cover tw-cursor-pointer"
+                />
+                <div class="tw-flex tw-flex-col tw-gap-[10px] tw-px-[12px]">
+                  <h5 class="tw-font-normal tw-text-[18px] tw-tracking-[3%]">
+                    {{ product.title | upcase }}
+                  </h5>
+                  <p class="tw-font-medium tw-text-[16px] tw-tracking-[0%]">
+                    {{ product.price | money }}
+                  </p>
+                </div>
+              </a>
+            </div>
+          {%- endfor %}
+        {% endif %}
+      </div>
+      <button
+        id="show-more-btn"
+        class="sm:tw-hidden tw-self-center tw-w-[327px] tw-h-[54px] tw-bg-black tw-text-white tw-font-semibold tw-text-[16px] tw-leading-[140%] tw-tracking-[3%] tw-rounded-[100px] tw-cursor-pointer"
+      >
+        Show More
+      </button>
+  </best-sellers-section>
+</div>
+
+{% schema %}
+{
+  "name": "Best Sellers",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "t:content.size"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Best Sellers",
+      "category": "t:categories.collections"
+    }
+  ]
+}
+{% endschema %}
