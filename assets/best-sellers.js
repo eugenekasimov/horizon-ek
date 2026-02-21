@@ -1,8 +1,5 @@
-// Product cards are built in Liquid (best-sellers.liquid). This script handles:
-// - Image hover (swap to second image on pointerenter, reset on pointerleave)
-// - Mobile "Show more" (reveal cards beyond the first MOBILE_INITIAL_COUNT)
+import { mediaQueryLarge } from "@theme/utilities";
 
-const MOBILE_BREAKPOINT = 640;
 const MOBILE_INITIAL_COUNT = 4;
 
 class BestSellersSection extends HTMLElement {
@@ -14,20 +11,18 @@ class BestSellersSection extends HTMLElement {
       "product-cards-container",
     );
     this.showMoreBtn = document.getElementById("show-more-btn");
-    const isMobile = window.matchMedia(
-      `(max-width: ${MOBILE_BREAKPOINT}px)`,
-    ).matches;
 
     this.bindImageHover();
+    this.showMoreBtn?.addEventListener("click", () => this.loadMoreProducts(), {
+      signal,
+    });
 
-    if (isMobile) {
-      this.hideExtraCards();
-      this.showMoreBtn?.addEventListener(
-        "click",
-        () => this.loadMoreProducts(),
-        { signal },
-      );
-    }
+    mediaQueryLarge.addEventListener(
+      "change",
+      (e) => this.syncToViewport(!e.matches),
+      { signal },
+    );
+    this.syncToViewport(!mediaQueryLarge.matches);
   }
 
   disconnectedCallback() {
@@ -40,10 +35,13 @@ class BestSellersSection extends HTMLElement {
     );
     if (!cards?.length) return;
 
-    const defaultSrc = (card) => card.getAttribute("data-image-default");
-    const hoverSrc = (card) => card.getAttribute("data-image-hover");
+    const defaultSrc = (/** @type {Element} */ card) =>
+      card.getAttribute("data-image-default");
+    const hoverSrc = (/** @type {Element} */ card) =>
+      card.getAttribute("data-image-hover");
 
-    cards.forEach((card) => {
+    const { signal } = this.abortController ?? {};
+    cards.forEach((/** @type {HTMLElement} */ card) => {
       const img = card.querySelector(".best-seller-card__img");
       if (!img) return;
 
@@ -56,25 +54,46 @@ class BestSellersSection extends HTMLElement {
         () => {
           img.setAttribute("src", hover);
         },
-        { signal: this.abortController.signal },
+        { signal },
       );
       card.addEventListener(
         "pointerleave",
         () => {
           img.setAttribute("src", def);
         },
-        { signal: this.abortController.signal },
+        { signal },
       );
     });
+  }
+
+  /** @param {boolean} isMobile */
+  syncToViewport(isMobile) {
+    if (isMobile) {
+      this.hideExtraCards();
+      this.showMoreBtn?.classList.remove("hidden");
+    } else {
+      this.showAllCards();
+      this.showMoreBtn?.classList.add("hidden");
+    }
   }
 
   hideExtraCards() {
     const cards =
       this.productCardsContainer?.querySelectorAll(".best-seller-card");
     if (!cards) return;
-    cards.forEach((card, index) => {
+    cards.forEach((/** @type {HTMLElement} */ card, index) => {
       card.classList.toggle("hidden", index >= MOBILE_INITIAL_COUNT);
       card.dataset.showMoreHidden = index >= MOBILE_INITIAL_COUNT ? "true" : "";
+    });
+  }
+
+  showAllCards() {
+    const cards =
+      this.productCardsContainer?.querySelectorAll(".best-seller-card");
+    if (!cards) return;
+    cards.forEach((/** @type {HTMLElement} */ card) => {
+      card.classList.remove("hidden");
+      card.removeAttribute("data-show-more-hidden");
     });
   }
 
