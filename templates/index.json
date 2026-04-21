@@ -85,17 +85,9 @@
         "padding-block-start": 100,
         "padding-block-end": 72
       }
-    },
-    "best_sellers_apmjFe": {
-      "type": "best-sellers",
-      "name": "Best Sellers",
-      "settings": {
-        "collection": "best-sellers"
-      }
     }
   },
   "order": [
-    "hero_jVaWmY",
-    "best_sellers_apmjFe"
+    "hero_jVaWmY"
   ]
 }
